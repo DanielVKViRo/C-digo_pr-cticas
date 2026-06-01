@@ -1,0 +1,66 @@
+
+# Tomamos todos los zotus cuya filogenia queremos conocer con el script secuencia_zotu.
+bash Mis_scripts/secuencia_zotu.sh
+# En este script tomamos todas las secuencias que tengan frecuencia mayor de 0.001 y número de muestras menor a 899,
+# frecuencia mayor de 0.0005 y número de muestras de menos de 450 y frecuencia mayor de 0.00025 y número de muestras
+# menor de 225.
+
+# El resultado es el documento secuencias.fa, donde aparece cada zotu con su secuencia y no hay secuencias repetidas.
+
+# Ahora queremos hacer BLAST contra la base de datos de 16S del NCBI. Para ello nos vamos a descargar la base de
+# datos.
+
+# Primero creamos la carpeta donde vamos a almacenar la base de datos.
+mkdir blastdb
+cd blastdb
+
+# Nos descargamos la base de datos de 16S desde NCBI.
+wget -c ftp://ftp.ncbi.nlm.nih.gov/blast/db/16S_ribosomal_RNA.tar.gz
+
+# Una vez tenemos el archivo, primero descomprimimos
+gunzip 16S_ribosomal_RNA.tar.gz
+
+# Y luego extraemos
+tar -xvf 16S_ribosomal_RNA.tar
+
+cd ..
+
+# Para usar blastn en bash tenemos que descargarlo
+sudo apt install ncbi-blast+ -y
+
+# Hacemos blast contra la base de datos del 16S descargada del NCBI
+blastn -query secuencias.fa -db blastdb/16S_ribosomal_RNA -out resultados_16S.tsv \ 
+-outfmt "6 qseqid sseqid pident length mismatch gapopen evalue bitscore stitle" -num_threads 12
+# Esto nos da una tabla con las especies posibles que corresponden a los zotus llamada resultados_16S.tsv.
+
+# Creamos un archivo donde se filtren aquellas especies con coincidencia de más del 94%.
+awk '$3 > 94' resultados_16S.tsv > resultados_16S_filtro94.tsv
+
+# Podemos ejecutar un comando para ver el número de zotus que nos quedan.
+cut -f1 resultados_16S_filtro94.tsv | sort | uniq | wc -l
+# Solo 40 han sobrevivido este filtro, de las 65 iniciales.
+
+# Con el script tabla_especie.sh creamos un documento con cada zotu y una tabla con la coincidencia de cada genero 
+# con ese zotu
+bash Mis_scripts/tabla_especie.sh
+# Esto nos da un archivo tabla_genero.txt, donde cada zotu va seguido por posibles candidatos a genero.
+
+# Cambiamos a mano el documento anterior para poner los posibles géneros de cada zotu y sacamos todos los géneros que 
+# hay en los zotus.
+grep 'Zotu' tabla_genero.txt | cut -d: -f2 | tr ',' '\n' | sort | uniq | tail -n +3 > generos_zotus.txt
+
+# Vamos a comparar estos géneros con los que hay en la BBDD. Primero sacamos los géneros de la BBDD de 16S.
+grep '>' BBDD_taxonomica/Sintax_16S_Soilforecast_viñedos_v7.fasta | cut -d, -f7 | cut -d: -f2 | sort | uniq > generos_BBDD.txt
+
+# Ahora vemos si los generos que tenemos están en las bases de datos.
+bash Mis_scripts/Comparacion.sh
+# Esto nos da un archivo generos_definitivos.sh con los generos de generos_zotus.sh que no están en las BBDD.
+
+# Hacemos un directorio donde descargamos los fastas de estos géneros
+mkdir fasta_BBDD
+# Y descargamos en él los fastas de los géneros sacados a mano de la base de datos LPSN
+
+# Unimos todos los fasta en uno solo
+cat fasta_BBDD/*.fasta > fasta_BBDD/Todo.fasta
+# Y ponemos el cabecero correcto usando la taxonomía de LPSN.
+# Esto nos da el archivo Todo_correcto.fasta con los cabeceros correctos.

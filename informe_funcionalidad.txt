@@ -1,0 +1,8 @@
+# He tomado las especies de KSB del estudio que me pasó Guille y tomé los géneros. En ese archivo hice sort y uniq para obtener 
+# Biodisponibilidad_potasio_ordenado.txt
+
+# Cambio los cabeceros para ponerlos en el formato correcto. 
+
+# Modificamos el archivo para ponerlo en formato faprotax.
+
+# Vemos si los generos están en la BBDD. Solo Myroides no está en la base de datos.

@@ -1,0 +1,23 @@
+## Cianobacteriotas. Todo esto se ejecuta desde /home/danie/Practicas_metagenomica_ciano
+
+# Primero obtengo todos los géneros del filo Cianobacteriotas usando la base de datos LPSN
+# De estos solo voy a obtener los primeros 497 del archivo generos_ciano_sin_rep.txt. Guille hace el resto.
+
+# Hago un directorio donde voy a meter los archivos fasta.
+mkdir fasta
+
+# Me descargo las fastas de los generos del 1 al 497 a mano.
+# De 497 géneros, solo 125 tienen secuencia.
+
+# Falta cambiar el cabecero de los fastas al formato correcto.
+
+# Primero creamos la carpeta en la que queremos meter los fastas con los cabeceros correctos
+mkdir fasta_correcto
+# Luego cambiamos a mano los cabeceros.
+
+# De entre los archivos, algunos Arhinema, Eurychoronema y Johanseniella carecen de familia y Arhinema también de orden. Por ello, se han modificado sus
+# familias y ordenes. Fortiea está vacío, por lo que se ha eliminado. 
+rm fasta_correcto/fortiea.fasta
+
+# Por último, se ha quitado el -1 de acaryochloris, tanto del nombre del archivo como de los nombres del genero y orden
+mv fasta_correcto/acaryochloris-1.fasta fasta_correcto/acaryochloris.fasta
